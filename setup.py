@@ -9,4 +9,4 @@ setup(name='flask_jwtlogin',
       license='BSD',
       packages=['flask_jwtlogin'],
       zip_safe=False,
-      install_requires=['flask'])
+      install_requires=['flask', 'PyJWT'])
