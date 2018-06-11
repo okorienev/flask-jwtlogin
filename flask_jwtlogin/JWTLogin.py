@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, has_request_context
 from flask_jwtlogin.errors import UserLoaderNotSetException
 from flask_jwtlogin.userMixins import AnonymousUser, KnownUser
 import time
@@ -6,6 +6,7 @@ import jwt
 
 
 class JWTLogin:
+    """container for singleton, redirects all getattr to field instance"""
     instance = None
 
     class __JWTLogin:
@@ -28,9 +29,10 @@ class JWTLogin:
             """loads user from jwt in present current request 
             :return AnonymousUser if token isn't present in request or some errors occurred during token decoding
             :return Your user class which extends KnownUser if validation and loading succeeded
-            :raise UserLoaderNotSetException if callback function to load user was not set
+            :raises UserLoaderNotSetException if callback function to load user was not set
+            :raises RuntimeError if working outside request context 
             """
-            with self.current_app.app_context():
+            if has_request_context():
                 if not self._callback:
                     raise UserLoaderNotSetException("User loader callback was not set")
                 token = self.get_jwt()
@@ -43,28 +45,35 @@ class JWTLogin:
                     return user if user else AnonymousUser()
                 except jwt.InvalidTokenError:
                     return AnonymousUser()
+            raise RuntimeError("Working outside request context")
 
         def get_jwt(self) -> str:
             """
-            Gets jwt from current request, works only inside application context
-            :return: jwt from current request (if present) 
+            Gets jwt from current request, works only inside request context
+            :return jwt from current request (if present)
+            :raises RuntimeError if working outside request context 
             """
-            with self.current_app.app_context:
+            if has_request_context():
                 return request.headers.get(self.config.get("JWT_HEADER_NAME"))
+            raise RuntimeError("Working outside request context")
 
         def generate_jwt_token(self, identifier: str) -> dict:
             """
-            generating jwt token, works only inside application context
+            generating jwt token, works only inside request context\n
+            default PyJWT encoder returns jwt in bytes type which is\n
+            not JSON serializable by Flask, so function decodes token to string\n 
             :param identifier: string representing unique identifier of your user 
-            :return: dict with structure {"JWT_HEADER_NAME": b"your_jwt_token"}  
+            :return: dict with structure {"JWT_HEADER_NAME": "your_jwt_token"}
+            :raises RuntimeError if working outside request context 
             """
-            with self.current_app.app_context():
+            if has_request_context():
                 token = jwt.encode({"sub": identifier,
                                     "iat": int(time.time()),
                                     "exp": int(time.time()) + self.config.get("JWT_LIFETIME")},
                                    self.config.get("JWT_SECRET_KEY"),
                                    algorithm=self.config.get("JWT_ENCODING_ALGORITHM"))
-                return {self.config.get('JWT_HEADER_NAME'): token}
+                return {self.config.get('JWT_HEADER_NAME'): token.decode()}
+            raise RuntimeError("Working outside request context")
 
     def __init__(self):
         if not JWTLogin.instance:
