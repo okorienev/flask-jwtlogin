@@ -1,5 +1,5 @@
 import flask_jwtlogin as jwtl
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, abort
 from threading import Thread
 from requests import get
 from json import loads
@@ -37,7 +37,7 @@ def get_token(name):
     for i in user_storage:
         if i.name == name:
             return jsonify(login_manager.generate_jwt_token(i.identifier))
-    return 'User not found'
+    abort(401)
 
 
 @app.route('/login/')
