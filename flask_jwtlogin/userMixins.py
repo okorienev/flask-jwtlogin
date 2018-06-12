@@ -24,8 +24,8 @@ class AnonymousUser(AbstractUser):
     def is_anonymous(self) -> bool:
         return True
 
-    def __init__(self):
-        pass
-
     def is_authenticated(self) -> bool:
         return False
+
+    def __init__(self):
+        pass
