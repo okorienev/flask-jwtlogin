@@ -2,3 +2,5 @@
 \.idea/
 
 flask_jwtlogin/__pycache__/
+
+test_env/
