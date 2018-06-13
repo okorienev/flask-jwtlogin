@@ -84,7 +84,7 @@ if __name__ == '__main__':
     assert get('http://127.0.0.1:5000/jwt/', headers={app.config.get('JWT_HEADER_NAME'): 'random'}).text == 'Succeeded'
     for i in user_storage:
         assert get('http://127.0.0.1:5000/get-token/{}'.format(i.name)).status_code == 200
-    assert get('http://127.0.0.1:5000/get-token/Unknown_user').text == 'User not found'
+    assert get('http://127.0.0.1:5000/get-token/Unknown_user').status_code == 401
     for i in user_storage:
         token_json = loads(get('http://127.0.0.1:5000/get-token/{}'.format(i.name)).text)
         user_identifier = get('http://127.0.0.1:5000/login/', headers=token_json).text
