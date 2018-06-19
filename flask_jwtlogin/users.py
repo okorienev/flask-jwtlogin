@@ -1,18 +1,8 @@
-from abc import ABC, abstractmethod
+from flask import g
+from werkzeug.local import LocalProxy
 
 
-class AbstractUser(ABC):
-
-    @abstractmethod
-    def is_authenticated(self) ->bool:
-        pass
-
-    @abstractmethod
-    def is_anonymous(self) ->bool:
-        pass
-
-
-class KnownUser(AbstractUser):
+class KnownUser:
     def is_anonymous(self) -> bool:
         return False
 
@@ -20,7 +10,7 @@ class KnownUser(AbstractUser):
         return True
 
 
-class AnonymousUser(AbstractUser):
+class AnonymousUser:
     def is_anonymous(self) -> bool:
         return True
 
@@ -29,3 +19,12 @@ class AnonymousUser(AbstractUser):
 
     def __init__(self):
         pass
+
+
+def _safe_load_from_g():
+    if hasattr(g, "_user"):
+        return getattr(g, "_user")
+    return AnonymousUser()
+
+
+current_user = LocalProxy(lambda: _safe_load_from_g())
