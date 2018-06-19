@@ -1,9 +1,10 @@
 # Flask-jwtlogin quickstart
 flask-jwtlogin is a lightweight flask extension to handle users in REST APIs  
 What it offers to you:
-* jwt_required decorator to check jwt presence in current request
-* generate_jwt func to get token with user identifier encrypted
-* load_user to load user from request using callback function
+* **jwt_required** decorator to check jwt presence in current request
+* **generate_jwt** func to get token with user identifier encrypted
+* **load_user** for manual loading user from request using callback function
+* **current_user** proxy 
 
 ### How to use it?
 First of all, you need some configuration:
@@ -15,9 +16,7 @@ First of all, you need some configuration:
     'JWT_LIFETIME': 3600 * 24 * 7  # in seconds
 }
 ```
-Then create a login manager instance.  
-**Warning! JWTLogin is a singleton, so don't try to create many instances.**  
-**Also IDEs can have problem showing methods because \__getattr__ redirects to inner class**  
+Then create a login manager instance.
 ```python
 login_manager = jwtl.JWTLogin()  #creating instance
 login_manager.init_app(app)  #importing configuration
@@ -60,9 +59,19 @@ def get_token(name):
 Sample route to load user:
 ```python
 @app.route('/login/')
-@jwtl.jwt_required
+@login_manager.jwt_required
 def login():
     """View that loads user from jwt present in request"""
     user = login_manager.load_user()
     return user.identifier
 ```
+
+the example above shows the way of manual user loading but module also provides suitable proxy
+The **jwt_required** decorator adds user loaded from request to **flask.g** and **current_user** loads it.  
+```python
+@app.route('/current_user_test/')
+@login_manager.jwt_required
+def test_current_user():
+    return jwtl.current_user.identifier
+```
+flask.g lives inside application context (new for each request) so it's safe to store values in API there 
