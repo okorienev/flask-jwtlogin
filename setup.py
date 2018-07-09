@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='flask_jwtlogin',
-      version='0.1',
+      version='0.2.1',
       description='flask extension to handle login users in APIs',
       url='https://github.com/AlexPraefectus/flask-jwtlogin',
       author='Alex Korienev',
@@ -16,4 +16,4 @@ setup(name='flask_jwtlogin',
       packages=['flask_jwtlogin'],
       zip_safe=False,
       test_require=['requests'],
-      install_requires=['flask', 'PyJWT'])
+      install_requires=['flask', 'pyjwt'])
