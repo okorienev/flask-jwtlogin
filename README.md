@@ -7,6 +7,10 @@ What it offers to you:
 * **current_user** proxy 
 
 ### How to use it?
+flask-jwtlogin can be simply installed with pip:
+```bash
+pip install flask-jwtlogin
+```
 First of all, you need some configuration:
 ```python
 {
